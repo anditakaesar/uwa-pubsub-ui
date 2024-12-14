@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubSub UI</title>
+    <link rel="stylesheet" href="./pure-min.css">
+    <link rel="stylesheet" href="./mermaid.min.css">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./gridjs.umd.js"></script>
+</head>
+
+<body>
+    <div class="pure-menu left-menu">
+        <span class="pure-menu-heading">PubSub UI</span>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+                <a href="./topics.html" class="pure-menu-link">Topics</a>
+            </li>
+            <li class="pure-menu-item menu-active">
+                <span class="pure-menu-link">>> New Topic</span>
+            </li>
+            <li class="pure-menu-item">
+                <a href="./subscriptions.html" class="pure-menu-link">Subscriptions</a>
+            </li>
+        </ul>
+    </div>
+    <div class="layout">
+        <div class="content">
+            <h1 class="title">New Topic</h1>
+            <div class="pure-form">
+                <input type="text" id="topic-name" placeholder="Topic Name" class="pure-input-2-3">
+                <button class="pure-button pure-button-primary" onclick="createTopic()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createTopic() {
+            const topicName = document.getElementById('topic-name').value;
+            if (topicName === '') {
+                alert('Topic name cannot be empty');
+                return;
+            }
+
+            fetch('/api/topics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: topicName
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = './topics.html';
+                } else {
+                    console.error('Failed to create topic:', response.statusText);
+                    alert('Failed to create topic');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

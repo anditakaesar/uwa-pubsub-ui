@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubSub UI</title>
+    <link rel="stylesheet" href="./pure-min.css">
+    <link rel="stylesheet" href="./mermaid.min.css">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./gridjs.umd.js"></script>
+</head>
+
+<body>
+    <div class="pure-menu left-menu">
+        <span class="pure-menu-heading">PubSub UI</span>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item menu-active">
+                <a href="#" class="pure-menu-link">Topics</a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="./subscriptions.html" class="pure-menu-link">Subscriptions</a>
+            </li>
+        </ul>
+    </div>
+    <div class="layout">
+        <div class="content">
+            <h1 class="title">Topics</h1>
+            <a class="pure-button pure-button-primary" href="./topic_new.html">New Topic</a> 
+            <div id="topic-wrapper"></div>
+        </div>
+    </div>
+
+    <div id="myModal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <a class="close" onclick="closeModal()">&times;</a>
+            <p>Are you sure want to delete this?</p>
+            <p class="modal-content-p" id="modal-topic-id"></p>
+            <div style="text-align: right;">
+                <button class="button-error pure-button"
+                    onclick="deleteTopic(document.getElementById('modal-topic-id').innerHTML)">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function deleteTopic(topicId) {
+            try {
+                const response = await fetch(`/api/topics/${topicId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    // Refresh the page after successful deletion
+                    window.location.reload();
+                } else {
+                    console.error('Failed to delete topic:', response.statusText);
+                    document.getElementById('modal-topic-id').innerHTML = response.statusText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('modal-topic-id').innerHTML = response.statusText;
+            }
+        }
+
+        function openModal(topicId) {
+            document.getElementById('myModal').style.display = 'block';
+            document.getElementById('modal-topic-id').innerHTML = topicId;
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+
+        const topicGrid = new gridjs.Grid({
+            columns: [
+                {
+                    name: "Topic",
+                    attributes: (cell) => {
+                        // add these attributes to the td elements only
+                        if (cell) {
+                            return {
+                                'data-cell-content': cell,
+                                'onclick': () => {
+                                    const newUrl = `./subscriptions.html?topicName=${cell}`;
+                                    window.location.href = newUrl;
+                                },
+                                'style': 'cursor: pointer',
+                            };
+                        }
+                    }
+                },
+                {
+                    name: "Name",
+                    hidden: true
+                },
+                {
+                    name: 'Actions',
+                    formatter: (_, row) => {
+                        return gridjs.html(`
+                    <button class="button-error pure-button" onclick="openModal('${row.cells[0].data}')">Delete</button>`)
+                    }
+                }
+            ],
+            pagination: {
+                limit: 10
+            },
+            search: true,
+            server: {
+                url: '/api/topics',
+                then: data => data.map(topic => [topic.ID, topic.Name])
+            }
+        })
+
+        topicGrid.render(document.getElementById("topic-wrapper"));
+    </script>
+</body>
+
+</html>

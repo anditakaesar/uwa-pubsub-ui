@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Debug bin
+__debug_bin*
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -23,9 +26,19 @@ go.work.sum
 
 # env file
 .env
+*_env.sh
 
 # .vscode folder
 .vscode/
 
 # out.txt after generating a test
 out.txt
+
+# build
+uwa-pubsub-ui
+
+# vendor
+vendor/
+
+# init
+init.pubsub/

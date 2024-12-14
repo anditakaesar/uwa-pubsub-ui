@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubSub UI</title>
+    <link rel="stylesheet" href="./pure-min.css">
+    <link rel="stylesheet" href="./mermaid.min.css">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./gridjs.umd.js"></script>
+</head>
+
+<body>
+    <div class="pure-menu left-menu">
+        <span class="pure-menu-heading">PubSub UI</span>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+                <a href="./topics.html" class="pure-menu-link">Topics</a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="./subscriptions.html" class="pure-menu-link">Subscriptions</a>
+            </li>
+            <li class="pure-menu-item menu-active">
+                <span class="pure-menu-link">>> New Subscription</span>
+            </li>
+        </ul>
+    </div>
+    <div class="layout">
+        <div class="content">
+            <h1 class="title">New Subscription</h1>
+            <h2 id="topic-title" class="title">Topic: <span id="topic-name"></span></h2>
+            <div class="pure-form">
+                <input type="text" id="subscription-name" placeholder="Subscription Name" class="pure-input-2-3">
+                <button class="pure-button pure-button-primary" onclick="createSubscription()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const selectedTopic = urlParams.get('topicName') ?? '';
+        
+        function loadTopicName() {
+            if (selectedTopic === '') {
+                document.getElementById('topic-title').innerHTML = 'All Topics';
+                document.getElementById('new-subscription-button').style.display = 'none';
+                return;
+            }
+            document.getElementById('topic-name').innerHTML = selectedTopic;
+        }
+
+        function createSubscription() {
+            const subscriptionName = document.getElementById('subscription-name').value;
+            if (subscriptionName === '') {
+                alert('Subscription name cannot be empty');
+                return;
+            }
+
+            fetch('/api/subscriptions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: subscriptionName,
+                    topicId: selectedTopic
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = `./subscriptions.html?topicName=${selectedTopic}`;
+                } else {
+                    console.error('Failed to create subscription:', response.statusText);
+                }
+            });
+        }
+
+        loadTopicName();
+    </script>
+</body>
+
+</html>

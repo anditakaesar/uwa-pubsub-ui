@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubSub UI</title>
+    <link rel="stylesheet" href="./pure-min.css">
+    <link rel="stylesheet" href="./mermaid.min.css">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./gridjs.umd.js"></script>
+</head>
+
+<body>
+    <div class="pure-menu left-menu">
+        <span class="pure-menu-heading">PubSub UI</span>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+                <a href="./topics.html" class="pure-menu-link">Topics</a>
+            </li>
+            <li class="pure-menu-item menu-active">
+                <a href="#" class="pure-menu-link">Subscriptions</a>
+            </li>
+        </ul>
+    </div>
+    <div class="layout">
+        <div class="content">
+            <h1 class="title">Subscription</h1>
+            <h2 id="topic-title" class="title">Topic: <span id="topic-name"></span></h2>
+            <button id="new-subscription-button" class="pure-button pure-button-primary" onclick="openNewSubsPage()">New Subscription</button>
+            <div id="subscription-wrapper"></div>
+        </div>
+    </div>
+
+
+    <div id="myModal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <a class="close" onclick="closeModal()">&times;</a>
+            <p>Are you sure want to delete this?</p>
+            <p class="modal-content-p" id="modal-subscription-id"></p>
+            <div style="text-align: right;">
+                <button class="button-error pure-button"
+                    onclick="deleteSubscription(document.getElementById('modal-subscription-id').innerHTML)">Delete</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const selectedTopic = urlParams.get('topicName') ?? '';
+        
+        function loadTopicName() {
+            if (selectedTopic === '') {
+                document.getElementById('topic-title').innerHTML = 'All Topics';
+                document.getElementById('new-subscription-button').style.display = 'none';
+                return;
+            }
+            document.getElementById('topic-name').innerHTML = selectedTopic;
+        }
+
+        function openNewSubsPage() {
+            window.location.href = `./subscription_new.html?topicName=${selectedTopic}`;
+        }
+
+        async function deleteSubscription(subscriptionId) {
+            try {
+                const response = await fetch(`/api/subscriptions/${subscriptionId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    // Refresh the page after successful deletion
+                    window.location.reload();
+                } else {
+                    console.error('Failed to delete subscription:', response.statusText);
+                    document.getElementById('modal-subscription-id').innerHTML = response.statusText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('modal-subscription-id').innerHTML = response.statusText;
+            }
+        }
+
+        function openModal(subscriptionId) {
+            document.getElementById('myModal').style.display = 'block';
+            document.getElementById('modal-subscription-id').innerHTML = subscriptionId;
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        const subsGrid = new gridjs.Grid({
+            columns: [
+                {
+                    name: "Subscription"
+                },
+                {
+                    name: "Name",
+                    hidden: true
+                },
+                {
+                    name: 'Actions',
+                    formatter: (_, row) => {
+                        return gridjs.html(`
+                    <button class="button-error pure-button" onclick="openModal('${row.cells[0].data}')">Delete</button>`)
+                    }
+                }
+            ],
+            pagination: {
+                limit: 10
+            },
+            search: true,
+            server: {
+                url: '/api/subscriptions?topicName=' + selectedTopic,
+                then: data => data.map(subs => [subs.ID, subs.Name])
+            }
+        })
+
+        subsGrid.render(document.getElementById("subscription-wrapper"));
+        loadTopicName();
+    </script>
+</body>
+
+</html>

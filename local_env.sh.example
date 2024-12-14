@@ -1,0 +1,4 @@
+export PUBSUB_EMULATOR_HOST="localhost:8085"
+export ProjectID="local-project"
+export PubSubInitFile="pubsub.init.yaml"
+export InitPubSubFromFile="false"
