@@ -101,7 +101,8 @@
                     name: 'Actions',
                     formatter: (_, row) => {
                         return gridjs.html(`
-                    <button class="button-error pure-button" onclick="openModal('${row.cells[0].data}')">Delete</button>`)
+                    <button class="button-error pure-button" onclick="openModal('${row.cells[0].data}')">Delete</button>
+                    <a class="pure-button pure-button-primary" href="./topic_publish.html?topicName=${row.cells[0].data}">Publish Message</a>`)
                     }
                 }
             ],

@@ -97,7 +97,20 @@
         const subsGrid = new gridjs.Grid({
             columns: [
                 {
-                    name: "Subscription"
+                    name: "Subscription",
+                    attributes: (cell) => {
+                        // add these attributes to the td elements only
+                        if (cell) {
+                            return {
+                                'data-cell-content': cell,
+                                'onclick': () => {
+                                    const newUrl = `./subscription_pull.html?subsName=${cell}`;
+                                    window.location.href = newUrl;
+                                },
+                                'style': 'cursor: pointer',
+                            };
+                        }
+                    }
                 },
                 {
                     name: "Name",

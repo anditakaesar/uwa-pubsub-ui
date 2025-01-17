@@ -19,11 +19,11 @@
             <li class="pure-menu-item">
                 <a href="./topics.html" class="pure-menu-link">Topics</a>
             </li>
+            <li class="pure-menu-item menu-active">
+                <span class="pure-menu-link">>> Publish Message</span>
+            </li>
             <li class="pure-menu-item">
                 <a href="./subscriptions.html" class="pure-menu-link">Subscriptions</a>
-            </li>
-            <li class="pure-menu-item menu-active">
-                <span class="pure-menu-link">>> New Subscription</span>
             </li>
         </ul>
     </div>
@@ -32,8 +32,8 @@
             <h1 class="title">New Subscription</h1>
             <h2 id="topic-title" class="title">Topic: <span id="topic-name"></span></h2>
             <div class="pure-form">
-                <input type="text" id="subscription-name" placeholder="Subscription Name" class="pure-input-2-3" />
-                <button class="pure-button pure-button-primary" onclick="createSubscription()">Create</button>
+                <textarea type="text" id="topic-message" placeholder="Message" class="pure-input-2-3"></textarea>
+                <button class="pure-button pure-button-primary" onclick="createSubscription()">Publish</button>
             </div>
         </div>
     </div>
@@ -45,34 +45,33 @@
         
         function loadTopicName() {
             if (selectedTopic === '') {
-                document.getElementById('topic-title').innerHTML = 'All Topics';
-                document.getElementById('new-subscription-button').style.display = 'none';
+                window.location.href = './topics.html'
                 return;
             }
             document.getElementById('topic-name').innerHTML = selectedTopic;
         }
 
         function createSubscription() {
-            const subscriptionName = document.getElementById('subscription-name').value;
-            if (subscriptionName === '') {
-                alert('Subscription name cannot be empty');
+            const topicMessage = document.getElementById('topic-message').value;
+            if (topicMessage === '') {
+                alert('Message cannot be empty');
                 return;
             }
 
-            fetch('/api/subscriptions', {
+            fetch(`/api/topics/${selectedTopic}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    id: subscriptionName,
-                    topicId: selectedTopic
+                    topicId: selectedTopic,
+                    message: topicMessage
                 })
             }).then(response => {
                 if (response.ok) {
-                    window.location.href = `./subscriptions.html?topicName=${selectedTopic}`;
+                    window.location.href = './topics.html';
                 } else {
-                    console.error('Failed to create subscription:', response.statusText);
+                    console.error('Failed to publish message:', response.statusText);
                 }
             });
         }
